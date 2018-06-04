@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Artikel;
+use App\Kategori;
 use Illuminate\Http\Request;
 
 class ArtikelController extends Controller
@@ -14,7 +15,8 @@ class ArtikelController extends Controller
      */
     public function index()
     {
-        //
+        $artikels = Artikel::with('Kategori')->get();
+        return view('artikel.index',compact('artikels'));
     }
 
     /**
@@ -24,7 +26,9 @@ class ArtikelController extends Controller
      */
     public function create()
     {
-        //
+        
+        $kategoris = Kategori::all();
+         return view('artikel.create',compact('kategoris'));
     }
 
     /**
@@ -35,7 +39,19 @@ class ArtikelController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $this->validate($request,[
+            'kategori_id' => 'required|',
+            'judul' => 'required|',
+            'konten' => 'required',
+            'tanggal' => 'required'
+        ]);
+        $artikels = new Artikel;
+        $artikels->kategori_id = $request->kategori_id;
+        $artikels->judul = $request->judul;
+        $artikels->konten = $request->konten;
+        $artikels->tanggal = $request->tanggal;
+        $artikels->save();
+        return redirect()->route('artikel.index');
     }
 
     /**
@@ -44,9 +60,10 @@ class ArtikelController extends Controller
      * @param  \App\Artikel  $artikel
      * @return \Illuminate\Http\Response
      */
-    public function show(Artikel $artikel)
+    public function show($id)
     {
-        //
+        $artikels = Artikel::findOrFail($id);
+        return view('artikel.show',compact('artikels'));
     }
 
     /**
@@ -57,7 +74,10 @@ class ArtikelController extends Controller
      */
     public function edit(Artikel $artikel)
     {
-        //
+        $artikels = Artikel::findOrFail($id);
+        $kategoris = Kategori::all();
+        $selectedKategori = Artikel::findOrFail($id)->kategori_id;
+        return view('artikel.edit',compact('artikels','kategoris','selectedKategori'));
     }
 
     /**
@@ -69,7 +89,19 @@ class ArtikelController extends Controller
      */
     public function update(Request $request, Artikel $artikel)
     {
-        //
+        $this->validate($request,[
+            'kategori_id' => 'required|',
+            'judul' => 'required|',
+            'konten' => 'required',
+            'tanggal' => 'required'
+        ]);
+        $artikels = Artikel::findOrFail($id);
+        $artikels->kategori_id = $request->kategori_id;
+        $artikels->judul = $request->judul;
+        $artikels->konten = $request->konten;
+        $artikels->tanggal = $request->tanggal;
+        $artikels->save();
+        return redirect()->route('artikel.index');
     }
 
     /**
@@ -80,6 +112,8 @@ class ArtikelController extends Controller
      */
     public function destroy(Artikel $artikel)
     {
-        //
+        $artikels = Artikel::findOrFail($id);
+        $artikels->delete();
+        return redirect()->route('artikel.index');
     }
 }
